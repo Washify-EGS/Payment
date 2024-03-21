@@ -1,0 +1,20 @@
+{
+  "name": "accept-a-payment",
+  "version": "1.0.0",
+  "description": "",
+  "devDependencies": {},
+  "scripts": {
+    "start": "react-scripts start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@stripe/react-stripe-js": "^2.6.2",
+    "@stripe/stripe-js": "^3.0.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
+    "react-scripts": "^5.0.1"
+  }
+}

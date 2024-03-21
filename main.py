@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi_versioning import VersionedFastAPI, version
 from fastapi.encoders import jsonable_encoder
@@ -11,38 +11,30 @@ app = FastAPI(description="Payment API Wrapper to implemnt most used payment met
               )
 
 class payment(BaseModel):
-    amount: float
+    amount: int
     currency: str
-    method: str 
 
 
 @app.get("/v1/payments/{id}")
-async def root(id: str):
+async def getPayment(id: str):
     return {"message": "Hello World"}
 
 
 
 @app.post("/v1/payment")
-async def charge():
+async def charge(payment_request: payment):
+    try:
+        payment_intent = stripe.PaymentIntent.create(
+            amount=payment_request.amount,
+            currency=payment_request.currency,
+            payment_method_types=['card', 'paypal']
+        )
+        return {"paymentInfo": payment_intent}
     
-    payment_intent = stripe.PaymentIntent.create(
-    amount = 200,
-    currency = "eur",
-    payment_method_types = ['card', 'paypal']
-    )
-
-    return jsonable_encoder({'paymentInfo': payment_intent})
-        
-   
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code= 400, detail=str(e))
 
 
 @app.delete("/v1/payments")
-async def root():
+async def deletePayments():
     return {"message": "Hello World"}
-
-
-
-@app.put("/v1/payments")
-async def root():
-    return {"message": "Hello World"}
-
