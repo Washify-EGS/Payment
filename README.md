@@ -9,4 +9,5 @@ sudo npm install
 
 ## Usage
 ```bash
-
+node index.js
+```
