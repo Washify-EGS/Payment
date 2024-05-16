@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment</title>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/minstyle.io@2.0.1/dist/css/minstyle.io.min.css">
+  
+  <link rel="stylesheet" type="text/css" href="../css/style.css">
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="../js/script.js"></script>
+  <script src="../js/stripe.js"></script>
+  <link rel="icon" type="img/washify2.png" href="img/icon.png">
+</head>
+<body>
+  <div class="container">
+    <div class="content">
+      <div class="title-container">
+        <h2 class="title2">Washify Payment</h2>
+      </div>
+      <div class="pb-2">
+        <div class="ms-label ms-large ms-action2 ms-light" id="amount">$10.00 USD</div>
+      </div>
+      <div id="alerts"></div>
+      <div id="loading" class="spinner-container">
+        <div class="spinner"></div>
+      </div>
+      <div id="content" class="hide">
+          <div class="ms-card-content">
+            <img src="img/washify2.png" alt="Washify">
+          </div>
+        <div id="payment_options">
+          <form action="/checkout" method="post">
+            <button id="payWithStripe" class="stripe-button" type="submit" value="Proceed to Checkout">Pay with Stripe</button>
+          </form>     
+        </div>    
+      </div>
+    </div>
+  </div>
+</body>
+</html>
