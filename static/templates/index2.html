@@ -13,31 +13,23 @@
   <div class="container">
     <div class="content">
       <div class="title-container">
-        <h2 class="title2">Washify Payment</h2>
+        <h2 class="title2">Successful Payment!</h2>
       </div>
-      <div class="pb-2">
-        <div class="ms-label ms-large ms-action2 ms-light" id="amount">$10.00 USD</div>
-      </div>
-
-      <div id="alerts"></div>
-      <div id="loading" class="spinner-container">
-        <div class="spinner"></div>
-      </div>
+      <button style="color: white; border: none; padding: 10px 20px;">
+        <a href="/" style="color: white; text-decoration: none;">Back to Home</a>
+      </button>
+      
+     
       <div id="content" class="hide">
           <div class="ms-card-content">
             <img src="img/washify2.png" alt="Washify">
           </div>
-        <div id="payment_options">
-          <form action="/checkout" method="post">
-            <button id="payWithStripe" class="stripe-button" type="submit" value="Proceed to Checkout">Stripe</button>
-          </form>     
-        </div>    
+       
       </div>
     </div>
   </div>
 
   <!-- Add the Stripe JavaScript library -->
   <script src="https://js.stripe.com/v3/"></script>
-  <script src="../js/script.js"></script>
 </body>
 </html>
