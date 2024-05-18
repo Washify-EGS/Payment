@@ -8,6 +8,7 @@ sudo npm install
 ```
 
 ## Usage
+Run the following command:
 ```bash
 node index.js
 ```

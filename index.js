@@ -11,10 +11,10 @@ app.use(express.json());
 app.use(express.static("static"));
 app.use(express.urlencoded({ extended: true }));
 
-const port = process.env.PORT || 8080;
-const environment = process.env.ENVIRONMENT || "sandbox";
-const client_id = process.env.CLIENT_ID;
-const client_secret = process.env.CLIENT_SECRET;
+const port = 8080 || 8000;
+const environment = "sandbox";
+const client_id = "Abi_EpOMLx3Z1zZj_8es8kSRlqpDYQYZe2dPKQfmSvYyAmCc5YqhIUVSrQyWzRutQzE9T9OmNMCLhlgN";
+const client_secret = "EG7yrKQKbrin-Y9eQV0P96aRgLTylwcAMEoMkM-1ePYNAKecC0eLkglsIVYQhlKK94qtkmHGAdQTj2yG";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const endpoint_url =
@@ -22,11 +22,11 @@ const endpoint_url =
     ? "https://api-m.sandbox.paypal.com"
     : "https://api-m.paypal.com";
 
-const stripeClient = stripeModule(process.env.STRIPE_SECRET_KEY);
+const stripeClient = stripeModule("sk_test_51PHBeCP8sQXr5TAn3VEfZMDSuiWOxejb13sBs4ri2yt41b21WcP39uCm2er92kmhuBuWtrCDa1Oh4qwbeYmNoAGa00ev7kLAqN");
 
 var price = 10;
 var currency = "USD";
-const productName = "Product Name";
+const productName = "Car Wash";
 
 // Home route
 app.get("/", (req, res) => {
