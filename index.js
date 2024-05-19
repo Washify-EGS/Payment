@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.static("static"));
 app.use(express.urlencoded({ extended: true }));
 
-const port = 8080 || 8000;
+const port = 8002;
 const environment = "sandbox";
 const client_id = "Abi_EpOMLx3Z1zZj_8es8kSRlqpDYQYZe2dPKQfmSvYyAmCc5YqhIUVSrQyWzRutQzE9T9OmNMCLhlgN";
 const client_secret = "EG7yrKQKbrin-Y9eQV0P96aRgLTylwcAMEoMkM-1ePYNAKecC0eLkglsIVYQhlKK94qtkmHGAdQTj2yG";
