@@ -13,8 +13,10 @@ app.use(express.urlencoded({ extended: true }));
 
 const port = 8002;
 const environment = "sandbox";
-const client_id = "Abi_EpOMLx3Z1zZj_8es8kSRlqpDYQYZe2dPKQfmSvYyAmCc5YqhIUVSrQyWzRutQzE9T9OmNMCLhlgN";
-const client_secret = "EG7yrKQKbrin-Y9eQV0P96aRgLTylwcAMEoMkM-1ePYNAKecC0eLkglsIVYQhlKK94qtkmHGAdQTj2yG";
+const client_id =
+  "Abi_EpOMLx3Z1zZj_8es8kSRlqpDYQYZe2dPKQfmSvYyAmCc5YqhIUVSrQyWzRutQzE9T9OmNMCLhlgN";
+const client_secret =
+  "EG7yrKQKbrin-Y9eQV0P96aRgLTylwcAMEoMkM-1ePYNAKecC0eLkglsIVYQhlKK94qtkmHGAdQTj2yG";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const endpoint_url =
@@ -22,7 +24,9 @@ const endpoint_url =
     ? "https://api-m.sandbox.paypal.com"
     : "https://api-m.paypal.com";
 
-const stripeClient = stripeModule("sk_test_51PHBeCP8sQXr5TAn3VEfZMDSuiWOxejb13sBs4ri2yt41b21WcP39uCm2er92kmhuBuWtrCDa1Oh4qwbeYmNoAGa00ev7kLAqN");
+const stripeClient = stripeModule(
+  "sk_test_51PHBeCP8sQXr5TAn3VEfZMDSuiWOxejb13sBs4ri2yt41b21WcP39uCm2er92kmhuBuWtrCDa1Oh4qwbeYmNoAGa00ev7kLAqN"
+);
 
 var price = 10;
 var currency = "USD";
@@ -141,38 +145,38 @@ app.post("/checkout", async (req, res) => {
     shipping_address_collection: {
       allowed_countries: ["US", "BR", "PT", "ES", "GB"],
     },
-    // Redirect back to localhost:8080 after payment completion
-    success_url: "http://localhost:8080/success/?stripe_id={CHECKOUT_SESSION_ID}",
-    cancel_url: "http://localhost:8080/cancel",
+    // Redirect back to localhost:8002 after payment completion
+    success_url:
+      "http://localhost:8002/success/?stripe_id={CHECKOUT_SESSION_ID}",
+    cancel_url: "http://localhost:8002/cancel",
 
-    // fetch("http://localhost:8080/complete_order"
-
+    // fetch("http://localhost:8002/complete_order"
   });
 
   res.redirect(session.url);
 });
 
 // Complete the order - Stripe
-app.post('/complete_order_stripe', async (req, res) => {
+app.post("/complete_order_stripe", async (req, res) => {
   try {
     const { stripe_id } = req.body;
 
     // Retrieve the order details from Stripe
     const order = await stripeClient.checkout.sessions.retrieve(stripe_id, {
-      expand: ['payment_intent.payment_method'],
+      expand: ["payment_intent.payment_method"],
     });
 
     const successfulMessage = `Your payment was successful for order ID ${order.id}`;
 
     // Send the response back to the client
     res.json({ message: successfulMessage, order });
-
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'An error occurred during order completion' });
+    res
+      .status(500)
+      .json({ error: "An error occurred during order completion" });
   }
 });
-
 
 // Stripe checkout cancel
 app.get("/cancel", (req, res) => {
@@ -183,7 +187,7 @@ app.get("/success", (req, res) => {
   res.sendFile(__dirname + "/static/templates/index2.html");
 });
 
-app.post('/update_price_amount', (req, res) => {
+app.post("/update_price_amount", (req, res) => {
   try {
     // Extract the new price and currency from the request body
     const { amount: newPrice, currency: newCurrency } = req.body;
@@ -202,18 +206,22 @@ app.post('/update_price_amount', (req, res) => {
   } catch (error) {
     // Handle errors
     console.error("Error updating price and currency:", error);
-    res.status(500).json({ error: 'An error occurred while updating price and currency.' });
+    res
+      .status(500)
+      .json({ error: "An error occurred while updating price and currency." });
   }
 });
 
-app.get('/get_price_amount', (req, res) => {
+app.get("/get_price_amount", (req, res) => {
   try {
     // Send the current price and currency back to the client
     res.json({ price, currency });
   } catch (error) {
     // Handle errors
     console.error("Error getting price and currency:", error);
-    res.status(500).json({ error: 'An error occurred while getting price and currency.' });
+    res
+      .status(500)
+      .json({ error: "An error occurred while getting price and currency." });
   }
 });
 
