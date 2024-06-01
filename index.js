@@ -2,8 +2,10 @@ import dotenv from "dotenv";
 import express from "express";
 import fetch from "node-fetch";
 import stripeModule from "stripe";
+import session from "express-session";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 const app = express();
@@ -11,26 +13,23 @@ app.use(express.json());
 app.use(express.static("static"));
 app.use(express.urlencoded({ extended: true }));
 
+// Session configuration
+app.use(session({
+  secret: 'your_secret_key', // Replace with your own secret key
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+}));
+
 const port = 8002;
 const environment = "sandbox";
-const client_id =
-  "Abi_EpOMLx3Z1zZj_8es8kSRlqpDYQYZe2dPKQfmSvYyAmCc5YqhIUVSrQyWzRutQzE9T9OmNMCLhlgN";
-const client_secret =
-  "EG7yrKQKbrin-Y9eQV0P96aRgLTylwcAMEoMkM-1ePYNAKecC0eLkglsIVYQhlKK94qtkmHGAdQTj2yG";
+const client_id = "Abi_EpOMLx3Z1zZj_8es8kSRlqpDYQYZe2dPKQfmSvYyAmCc5YqhIUVSrQyWzRutQzE9T9OmNMCLhlgN";
+const client_secret = "EG7yrKQKbrin-Y9eQV0P96aRgLTylwcAMEoMkM-1ePYNAKecC0eLkglsIVYQhlKK94qtkmHGAdQTj2yG";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const endpoint_url =
-  environment === "sandbox"
-    ? "https://api-m.sandbox.paypal.com"
-    : "https://api-m.paypal.com";
+const endpoint_url = environment === "sandbox" ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
 
-const stripeClient = stripeModule(
-  "sk_test_51PHBeCP8sQXr5TAn3VEfZMDSuiWOxejb13sBs4ri2yt41b21WcP39uCm2er92kmhuBuWtrCDa1Oh4qwbeYmNoAGa00ev7kLAqN"
-);
-
-var price = 10;
-var currency = "USD";
-const productName = "Car Wash";
+const stripeClient = stripeModule("sk_test_51PHBeCP8sQXr5TAn3VEfZMDSuiWOxejb13sBs4ri2yt41b21WcP39uCm2er92kmhuBuWtrCDa1Oh4qwbeYmNoAGa00ev7kLAqN");
 
 // Home route
 app.get("/", (req, res) => {
@@ -41,6 +40,7 @@ app.get("/", (req, res) => {
 app.post("/create_order", (req, res) => {
   get_access_token()
     .then((access_token) => {
+      const { price, currency } = req.session;
       let order_data_json = {
         intent: req.body.intent.toUpperCase(),
         purchase_units: [
@@ -94,6 +94,7 @@ app.post("/complete_order", (req, res) => {
         .then((res) => res.json())
         .then((json) => {
           console.log(json);
+          req.session.payment_success = true; // Mark payment as successful
           res.send(json);
         });
     })
@@ -123,13 +124,15 @@ function get_access_token() {
 
 // Stripe checkout
 app.post("/checkout", async (req, res) => {
+  const { payment_uuid, price, currency } = req.session;
+
   const session = await stripeClient.checkout.sessions.create({
     line_items: [
       {
         price_data: {
           currency: currency,
           product_data: {
-            name: productName,
+            name: "Car Wash",
           },
           unit_amount: price * 100,
         },
@@ -137,22 +140,15 @@ app.post("/checkout", async (req, res) => {
       },
     ],
     mode: "payment",
-    payment_method_types: [
-      "card",
-      "paypal", // Add PayPal
-    ],
-
+    payment_method_types: ["card", "paypal"],  // Assuming PayPal integration within Stripe
     shipping_address_collection: {
       allowed_countries: ["US", "BR", "PT", "ES", "GB"],
     },
-    // Redirect back to localhost:8002 after payment completion
-    success_url:
-      "http://localhost:8002/success/?stripe_id={CHECKOUT_SESSION_ID}",
+    metadata: { payment_uuid }, // Include payment UUID in metadata for internal tracking
+    success_url: `http://localhost:8002/success`,
     cancel_url: "http://localhost:8002/cancel",
-
-    // fetch("http://localhost:8002/complete_order"
   });
-
+  req.session.payment_success = true; // Mark payment as successful
   res.redirect(session.url);
 });
 
@@ -172,9 +168,7 @@ app.post("/complete_order_stripe", async (req, res) => {
     res.json({ message: successfulMessage, order });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred during order completion" });
+    res.status(500).json({ error: "An error occurred during order completion" });
   }
 });
 
@@ -183,45 +177,51 @@ app.get("/cancel", (req, res) => {
   res.sendFile(__dirname + "/static/templates/index.html");
 });
 
+// Success endpoint
+app.get("/successfulpaymentuuid", (req, res) => {
+  const { payment_uuid, payment_success } = req.session;
+  if (payment_success) {
+    console.log(`Success endpoint payment_uuid: ${payment_uuid}`);
+    res.json({ payment_uuid });
+  } else {
+    res.status(400).json({ error: "Payment not successful yet." });
+  }
+});
+
 app.get("/success", (req, res) => {
   res.sendFile(__dirname + "/static/templates/index2.html");
 });
 
 app.post("/update_price_amount", (req, res) => {
   try {
-    // Extract the new price and currency from the request body
     const { amount: newPrice, currency: newCurrency } = req.body;
+    const payment_uuid = uuidv4(); // Generate a unique payment UUID
 
-    // Perform validation on the new price and currency if needed
-    // Update the price and currency variables
-    price = newPrice;
-    currency = newCurrency;
+    req.session.payment_uuid = payment_uuid; // Store in session
+    req.session.price = newPrice;
+    req.session.currency = newCurrency;
+    req.session.payment_success = false; // Initialize payment success as false
 
     // Log the updated values (optional)
-    console.log("Updated Price:", price);
-    console.log("Updated Currency:", currency);
+    console.log("Updated Price:", newPrice);
+    console.log("Updated Currency:", newCurrency);
+    console.log("Generated payment_uuid:", payment_uuid);
 
-    // Send price and currency data back to the client
-    res.json({ price, currency });
+    // Send price, currency data, and payment UUID back to the client
+    res.json({ price: newPrice, currency: newCurrency, payment_uuid });
   } catch (error) {
-    // Handle errors
-    console.error("Error updating price and currency:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while updating price and currency." });
+    console.error("Error updating price, currency, and generating payment UUID:", error);
+    res.status(500).json({ error: "An error occurred while updating price and currency and generating payment UUID." });
   }
 });
 
 app.get("/get_price_amount", (req, res) => {
   try {
-    // Send the current price and currency back to the client
+    const { price, currency } = req.session;
     res.json({ price, currency });
   } catch (error) {
-    // Handle errors
     console.error("Error getting price and currency:", error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while getting price and currency." });
+    res.status(500).json({ error: "An error occurred while getting price and currency." });
   }
 });
 

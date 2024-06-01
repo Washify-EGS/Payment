@@ -15,21 +15,23 @@
       <div class="title-container">
         <h2 class="title2">Successful Payment!</h2>
       </div>
-      <button style="color: white; border: none; padding: 10px 20px;">
-        <a href="/" style="color: white; text-decoration: none;">Back to Home</a>
+      <button id="backButton" style="color: white; border: none; padding: 10px 20px;">
+        Back to Home
       </button>
-      
-     
       <div id="content" class="hide">
           <div class="ms-card-content">
             <img src="img/washify2.png" alt="Washify">
           </div>
-       
       </div>
     </div>
   </div>
 
   <!-- Add the Stripe JavaScript library -->
   <script src="https://js.stripe.com/v3/"></script>
+  <script>
+    document.getElementById('backButton').addEventListener('click', function() {
+      window.close();
+    });
+  </script>
 </body>
 </html>
